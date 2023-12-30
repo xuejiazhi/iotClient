@@ -1,6 +1,7 @@
 package modbus
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"iotClient/protocol/comm"
@@ -14,6 +15,18 @@ func getRegisterValue(dataBytes []byte) int {
 	return retData
 }
 
+// intToBytes 整形转换成字节
+func intToBytes(ns []int) []byte {
+	// 创建一个字节数组
+	b := make([]byte, 0, 2*binary.MaxVarintLen64)
+	for _, n := range ns {
+		n1 := n / 256
+		n2 := n % 256
+		b = append(b, byte(n1), byte(n2))
+	}
+	return b
+}
+
 // Operate function
 type Operate func(x, y any) any
 
@@ -23,10 +36,20 @@ func GetModBusTcpPort(x, y any) any { return comm.If(x.(int) > 0, x, y).(int) }
 func CheckLessLen(x, y any) any {
 	return comm.If(len(x.([]byte)) > y.(int), nil, errors.New(fmt.Sprintf("less than %v", y)))
 }
+func CheckEqualLen(x, y any) any {
+	eq := comm.If(x.(int) == y.(int), nil, errors.New(fmt.Sprintf("length is not equal, %v", y)))
+	if eq != nil {
+		return eq.(error)
+	} else {
+		return eq
+	}
+
+}
 
 var GetOperate = map[string]Operate{
 	"slaveId":      GetModBusSlaveID,
 	"tcpAddr":      GetModBusTcpAddr,
 	"tcpPort":      GetModBusTcpPort,
 	"checkLessLen": CheckLessLen,
+	"checkEqLen":   CheckEqualLen,
 }

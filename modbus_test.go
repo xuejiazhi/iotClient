@@ -71,3 +71,9 @@ func Test_ReadInputRegister(t *testing.T) {
 
 	tm.Close()
 }
+
+func Test_WriteMultipleRegisters(t *testing.T) {
+	tm := initModbusClient()
+	tm.WriteMultipleRegisters(99, 4, []int{4, 3, 2, 1})
+	tm.Close()
+}
