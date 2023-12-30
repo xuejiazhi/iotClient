@@ -21,7 +21,8 @@ type ModbusClient interface {
 	ReadInputStatus(uint16, uint16) ([]int, error)
 	ReadInputRegisters(uint16, uint16) ([]int, error)
 
-	WriteSingleRegister(address, value uint16) error
+	WriteSingleRegister(uint16, uint16) error
+	WriteMultipleRegisters(address, quantity uint16, values []int) error
 }
 
 /*
@@ -75,7 +76,8 @@ func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int
 		return
 	}
 	//check less len
-	if err = GetOperate["checkLessLen"](results, 2).(error); err != nil {
+	if c := GetOperate["checkLessLen"](results, 2); c != nil {
+		err = c.(error)
 		return
 	}
 
@@ -159,6 +161,8 @@ func (t *TcpClient) ReadInputRegisters(address, quantity uint16) (values []int, 
 }
 
 // WriteSingleRegister 写入单个寄存器
+// address 地址
+// value 值
 func (t *TcpClient) WriteSingleRegister(address, value uint16) (err error) {
 	//写入单个寄存器
 	result, err := t.Client.WriteSingleRegister(address, value)
@@ -170,5 +174,28 @@ func (t *TcpClient) WriteSingleRegister(address, value uint16) (err error) {
 		return
 	}
 	//return data
+	return
+}
+
+// WriteMultipleRegisters 批量写入寄存器
+// address 地址
+// quantity 数量
+// values 更新的值列表
+func (t *TcpClient) WriteMultipleRegisters(address, quantity uint16, values []int) (err error) {
+	//check eq len
+	if c := GetOperate["checkEqLen"](len(values), int(quantity)); c != nil {
+		err = c.(error)
+		return
+	}
+	//将INT换算成Bytes
+	dataBytes := intToBytes(values)
+	if c := GetOperate["checkEqLen"](len(dataBytes), 2*int(quantity)); c != nil {
+		err = c.(error)
+		return
+	}
+	//写入data
+	_, err = t.Client.WriteMultipleRegisters(address, quantity, dataBytes)
+
+	//return
 	return
 }
