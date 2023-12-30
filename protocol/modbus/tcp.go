@@ -1,7 +1,6 @@
 package modbus
 
 import (
-	"errors"
 	"github.com/goburrow/modbus"
 	"iotClient/protocol/comm"
 	"time"
@@ -21,24 +20,14 @@ type ModbusClient interface {
 	ReadCoils(uint16, uint16) ([]int, error)
 	ReadInputStatus(uint16, uint16) ([]int, error)
 	ReadInputRegisters(uint16, uint16) ([]int, error)
+
+	WriteSingleRegister(address, value uint16) error
 }
 
 /*
 *@author
 * InitModbus Tcp
  */
-
-type Operate func(x, y any) any
-
-func GetModBusSlaveID(x, y any) any { return comm.If(x.(uint8) > 0, x, y).(uint8) }
-func GetModBusTcpAddr(x, y any) any { return comm.If(x != "", x, y).(string) }
-func GetModBusTcpPort(x, y any) any { return comm.If(x.(int) > 0, x, y).(int) }
-
-var GetOperate = map[string]Operate{
-	"slaveId": GetModBusSlaveID,
-	"tcpAddr": GetModBusTcpAddr,
-	"tcpPort": GetModBusTcpPort,
-}
 
 type TcpClient struct {
 	SlaveId byte
@@ -81,7 +70,12 @@ func (t *TcpClient) Close() (err error) {
 func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int, err error) {
 	//读取寄存器
 	results, err := t.Client.ReadHoldingRegisters(address, quantity)
+	//check error
 	if err != nil {
+		return
+	}
+	//check less len
+	if err = GetOperate["checkLessLen"](results, 2).(error); err != nil {
 		return
 	}
 
@@ -90,7 +84,7 @@ func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int
 		//一个数据为两个byte
 		dataBytes := results[i : i+2]
 		if len(dataBytes) == 2 {
-			values = append(values, int(dataBytes[0])*256+int(dataBytes[1]))
+			values = append(values, getRegisterValue(dataBytes))
 		}
 	}
 
@@ -99,41 +93,51 @@ func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int
 }
 
 // ReadCoils 读取线圈
+// address 地址
+// quantity 数量
 func (t *TcpClient) ReadCoils(address, quantity uint16) (data []int, err error) {
 	// 读点位线圈数据
 	results, err := t.Client.ReadCoils(address, quantity)
 	if err != nil {
 		return
 	}
-	//取data
-	if len(results) == 1 {
-		data = comm.DecimalToBinary(int(results[0]))
-	} else {
-		err = errors.New("get Coils data nil")
+	//check less len
+	if err = GetOperate["checkLessLen"](results, 1).(error); err != nil {
+		return
 	}
+
+	//取data
+	data = comm.DecimalToBinary(int(results[0]))
 
 	//return data
 	return
 }
 
 // ReadInputStatus 输入状态
+// address 地址
+// quantity 数量
 func (t *TcpClient) ReadInputStatus(address, quantity uint16) (data []int, err error) {
 	// 读点位线圈数据
 	results, err := t.Client.ReadDiscreteInputs(address, quantity)
+	//check error
 	if err != nil {
 		return
 	}
-	//取data
-	if len(results) == 1 {
-		data = comm.DecimalToBinary(int(results[0]))
-	} else {
-		err = errors.New("get Coils data nil")
+	//check less len
+	if err = GetOperate["checkLessLen"](results, 1).(error); err != nil {
+		return
 	}
+
+	//取data
+	data = comm.DecimalToBinary(int(results[0]))
 
 	//return data
 	return
 }
 
+// ReadInputRegisters 输入寄存器
+// address 地址
+// quantity 数量
 func (t *TcpClient) ReadInputRegisters(address, quantity uint16) (values []int, err error) {
 	//读取寄存器
 	results, err := t.Client.ReadInputRegisters(address, quantity)
@@ -150,6 +154,21 @@ func (t *TcpClient) ReadInputRegisters(address, quantity uint16) (values []int, 
 		}
 	}
 
+	//return data
+	return
+}
+
+// WriteSingleRegister 写入单个寄存器
+func (t *TcpClient) WriteSingleRegister(address, value uint16) (err error) {
+	//写入单个寄存器
+	result, err := t.Client.WriteSingleRegister(address, value)
+	if err != nil {
+		return
+	}
+	//check less len
+	if err = GetOperate["checkLessLen"](result, 2).(error); err != nil {
+		return
+	}
 	//return data
 	return
 }

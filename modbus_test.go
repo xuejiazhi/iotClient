@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	m2 "iotClient/protocol/modbus"
+	"log"
 	"testing"
 	"time"
 )
 
-// 读寄存器
-func Test_ReadHoldingRegisters(t *testing.T) {
+func initModbusClient() m2.ModbusClient {
 	var tm m2.ModbusClient = &m2.TcpClient{
 		TimeOut: 5 * time.Second,
 		Address: "localhost:502",
@@ -18,26 +18,33 @@ func Test_ReadHoldingRegisters(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	return tm
+}
+
+// 读寄存器
+func Test_ReadHoldingRegisters(t *testing.T) {
+	tm := initModbusClient()
+	defer tm.Close()
 
 	//读寄存器
 	values, _ := tm.ReadHoldingRegisters(uint16(99), uint16(3))
 	fmt.Println(values)
 
-	tm.Close()
+}
+
+func Test_WriteSingleRegister(t *testing.T) {
+	tm := initModbusClient()
+	defer tm.Close()
+
+	if err := tm.WriteSingleRegister(99, 120); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // 读线圈
 func Test_ReadCoils(t *testing.T) {
-	var tm m2.ModbusClient = &m2.TcpClient{
-		TimeOut: 5 * time.Second,
-		Address: "localhost:502",
-	}
-
-	err := tm.InitModbus()
+	tm := initModbusClient()
 	defer tm.Close()
-	if err != nil {
-		panic(err)
-	}
 
 	//读线圈
 	values, _ := tm.ReadCoils(99, 4)
@@ -45,16 +52,8 @@ func Test_ReadCoils(t *testing.T) {
 }
 
 func Test_ReadInputStatus(t *testing.T) {
-	var tm m2.ModbusClient = &m2.TcpClient{
-		TimeOut: 5 * time.Second,
-		Address: "localhost:502",
-	}
-
-	err := tm.InitModbus()
+	tm := initModbusClient()
 	defer tm.Close()
-	if err != nil {
-		panic(err)
-	}
 
 	//读输入状态
 	values, _ := tm.ReadInputStatus(99, 4)
@@ -63,15 +62,8 @@ func Test_ReadInputStatus(t *testing.T) {
 
 // 读输入寄存器
 func Test_ReadInputRegister(t *testing.T) {
-	var tm m2.ModbusClient = &m2.TcpClient{
-		TimeOut: 5 * time.Second,
-		Address: "localhost:502",
-	}
-	//init
-	err := tm.InitModbus()
-	if err != nil {
-		panic(err)
-	}
+	tm := initModbusClient()
+	defer tm.Close()
 
 	//读输入寄存器
 	values, _ := tm.ReadInputRegisters(uint16(99), uint16(3))
