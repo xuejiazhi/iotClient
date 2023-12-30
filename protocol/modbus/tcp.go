@@ -16,10 +16,11 @@ import (
 
 type ModbusClient interface {
 	InitModbus() error
+	Close() error
 	ReadHoldingRegisters(uint16, uint16) ([]int, error)
 	ReadCoils(uint16, uint16) ([]int, error)
-	Close() error
 	ReadInputStatus(uint16, uint16) ([]int, error)
+	ReadInputRegisters(uint16, uint16) ([]int, error)
 }
 
 /*
@@ -127,6 +128,26 @@ func (t *TcpClient) ReadInputStatus(address, quantity uint16) (data []int, err e
 		data = comm.DecimalToBinary(int(results[0]))
 	} else {
 		err = errors.New("get Coils data nil")
+	}
+
+	//return data
+	return
+}
+
+func (t *TcpClient) ReadInputRegisters(address, quantity uint16) (values []int, err error) {
+	//读取寄存器
+	results, err := t.Client.ReadInputRegisters(address, quantity)
+	if err != nil {
+		return
+	}
+
+	//设置数据
+	for i := 0; i < len(results); i = i + 2 {
+		//一个数据为两个byte
+		dataBytes := results[i : i+2]
+		if len(dataBytes) == 2 {
+			values = append(values, int(dataBytes[0])*256+int(dataBytes[1]))
+		}
 	}
 
 	//return data
