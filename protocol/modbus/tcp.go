@@ -7,6 +7,21 @@ import (
 	"time"
 )
 
+/**
+01：COIL STATUS（线圈状态）：用于读取和控制远程设备的开关状态，通常用于控制继电器等开关设备。
+02：INPUT STATUS（输入状态）：用于读取远程设备的输入状态，通常用于读取传感器等输入设备的状态。
+03：HOLDING REGISTER（保持寄存器）：用于存储和读取远程设备的数据，通常用于存储控制参数、设备状态等信息。
+04：INPUT REGISTER（输入寄存器）：用于存储远程设备的输入数据，通常用于存储传感器等输入设备的数据。
+*/
+
+type ModbusClient interface {
+	InitModbus() error
+	ReadHoldingRegisters(uint16, uint16) ([]int, error)
+	ReadCoils(uint16, uint16) ([]int, error)
+	Close() error
+	ReadInputStatus(uint16, uint16) ([]int, error)
+}
+
 /*
 *@author
 * InitModbus Tcp
@@ -25,11 +40,11 @@ var GetOperate = map[string]Operate{
 }
 
 type TcpClient struct {
-	Client  modbus.Client
-	Handler *modbus.TCPClientHandler
-	TimeOut time.Duration
 	SlaveId byte
 	Address string //TCP 地址 localhost:502
+	TimeOut time.Duration
+	Client  modbus.Client
+	Handler *modbus.TCPClientHandler
 }
 
 func (t *TcpClient) InitModbus() (err error) {
@@ -86,6 +101,24 @@ func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int
 func (t *TcpClient) ReadCoils(address, quantity uint16) (data []int, err error) {
 	// 读点位线圈数据
 	results, err := t.Client.ReadCoils(address, quantity)
+	if err != nil {
+		return
+	}
+	//取data
+	if len(results) == 1 {
+		data = comm.DecimalToBinary(int(results[0]))
+	} else {
+		err = errors.New("get Coils data nil")
+	}
+
+	//return data
+	return
+}
+
+// ReadInputStatus 输入状态
+func (t *TcpClient) ReadInputStatus(address, quantity uint16) (data []int, err error) {
+	// 读点位线圈数据
+	results, err := t.Client.ReadDiscreteInputs(address, quantity)
 	if err != nil {
 		return
 	}
