@@ -1,6 +1,7 @@
 package modbus
 
 import (
+	"errors"
 	"github.com/goburrow/modbus"
 	"iotClient/protocol/comm"
 	"time"
@@ -64,6 +65,11 @@ func (t *TcpClient) Close() (err error) {
 func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int, err error) {
 	//读取寄存器
 	results, err := t.Client.ReadHoldingRegisters(address, quantity)
+	if err != nil {
+		return
+	}
+
+	//设置数据
 	for i := 0; i < len(results); i = i + 2 {
 		//一个数据为两个byte
 		dataBytes := results[i : i+2]
@@ -71,6 +77,25 @@ func (t *TcpClient) ReadHoldingRegisters(address, quantity uint16) (values []int
 			values = append(values, int(dataBytes[0])*256+int(dataBytes[1]))
 		}
 	}
+
+	//return data
+	return
+}
+
+// ReadCoils 读取线圈
+func (t *TcpClient) ReadCoils(address, quantity uint16) (data []int, err error) {
+	// 读点位线圈数据
+	results, err := t.Client.ReadCoils(address, quantity)
+	if err != nil {
+		return
+	}
+	//取data
+	if len(results) == 1 {
+		data = comm.DecimalToBinary(int(results[0]))
+	} else {
+		err = errors.New("get Coils data nil")
+	}
+
 	//return data
 	return
 }
