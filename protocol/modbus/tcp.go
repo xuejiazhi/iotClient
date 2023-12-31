@@ -1,42 +1,15 @@
 package modbus
 
 import (
+	"errors"
 	"github.com/goburrow/modbus"
 	"iotClient/protocol/comm"
-	"time"
 )
-
-/**
-01：COIL STATUS（线圈状态）：用于读取和控制远程设备的开关状态，通常用于控制继电器等开关设备。
-02：INPUT STATUS（输入状态）：用于读取远程设备的输入状态，通常用于读取传感器等输入设备的状态。
-03：HOLDING REGISTER（保持寄存器）：用于存储和读取远程设备的数据，通常用于存储控制参数、设备状态等信息。
-04：INPUT REGISTER（输入寄存器）：用于存储远程设备的输入数据，通常用于存储传感器等输入设备的数据。
-*/
-
-type ModbusClient interface {
-	InitModbus() error
-	Close() error
-	ReadHoldingRegisters(uint16, uint16) ([]int, error)
-	ReadCoils(uint16, uint16) ([]int, error)
-	ReadInputStatus(uint16, uint16) ([]int, error)
-	ReadInputRegisters(uint16, uint16) ([]int, error)
-
-	WriteSingleRegister(uint16, uint16) error
-	WriteMultipleRegisters(address, quantity uint16, values []int) error
-}
 
 /*
 *@author
 * InitModbus Tcp
  */
-
-type TcpClient struct {
-	SlaveId byte
-	Address string //TCP 地址 localhost:502
-	TimeOut time.Duration
-	Client  modbus.Client
-	Handler *modbus.TCPClientHandler
-}
 
 func (t *TcpClient) InitModbus() (err error) {
 	//Address And Port
@@ -198,4 +171,28 @@ func (t *TcpClient) WriteMultipleRegisters(address, quantity uint16, values []in
 
 	//return
 	return
+}
+
+// WriteSingleCoil 写入单个线圈
+func (t *TcpClient) WriteSingleCoil(address, value uint16) (err error) {
+	//是否在数组里面
+	if !comm.InIntArray(int(value), []int{0, 1}) {
+		err = errors.New("modbus: state '1' must be either 1 (ON) or 0 (OFF)")
+		return
+	}
+
+	//取值
+	coilValue := comm.If(value == 1, CoilStateOn, CoilStateOff).(int)
+	//写入值
+	_, err = t.Client.WriteSingleCoil(address, uint16(coilValue))
+	if err != nil {
+		return
+	}
+
+	//return data
+	return
+}
+
+func (t *TcpClient) WriteMultipleCoils(address, quantity uint16, value []byte) {
+
 }

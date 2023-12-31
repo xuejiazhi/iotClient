@@ -1,0 +1,6 @@
+# github.com/goburrow/modbus v0.1.0
+## explicit
+github.com/goburrow/modbus
+# github.com/goburrow/serial v0.1.0
+## explicit
+github.com/goburrow/serial

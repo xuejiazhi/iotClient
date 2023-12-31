@@ -17,3 +17,14 @@ func DecimalToBinary(num int) (binary []int) {
 	//返回数据
 	return
 }
+
+func InIntArray(value int, inData []int) bool {
+	if len(inData) > 0 {
+		for _, datum := range inData {
+			if datum == value {
+				return true
+			}
+		}
+	}
+	return false
+}
