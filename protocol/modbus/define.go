@@ -31,10 +31,24 @@ type ModbusClient interface {
 	WriteMultipleCoils(uint16, uint16, []int) error
 }
 
+// TcpClient Tcp
 type TcpClient struct {
 	SlaveId byte
 	Address string //TCP 地址 localhost:502
 	TimeOut time.Duration
 	Client  modbus.Client
 	Handler *modbus.TCPClientHandler
+}
+
+// RtuClient 串口
+type RtuClient struct {
+	SlaveId  byte
+	Address  string
+	BaudRate int64  //波特率
+	DataBits int8   //数据位
+	Parity   string //奇偶校验位 O:奇; E:偶
+	StopBits int
+	TimeOut  time.Duration
+	Client   modbus.Client
+	Handler  *modbus.RTUClientHandler
 }

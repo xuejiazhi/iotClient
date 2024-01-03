@@ -195,6 +195,7 @@ func (t *TcpClient) WriteSingleCoil(address, value uint16) (err error) {
 	return
 }
 
+// WriteMultipleCoils 批量写入线圈
 func (t *TcpClient) WriteMultipleCoils(address, quantity uint16, values []int) (err error) {
 	//check eq len
 	if c := GetOperate["checkEqLen"](len(values), int(quantity)); c != nil {
@@ -225,4 +226,8 @@ func (t *TcpClient) WriteMultipleCoils(address, quantity uint16, values []int) (
 	}
 
 	return
+}
+
+func (t *TcpClient) WriteInputStatus(address, value uint16) {
+
 }
