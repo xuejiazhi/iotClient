@@ -87,8 +87,9 @@ func Test_WriteCoils(t *testing.T) {
 	tm.Close()
 }
 
+// 批量写线圈
 func Test_WriteMultiCoils(t *testing.T) {
 	tm := initModbusClient()
-	tm.WriteMultipleCoils(99, 5, []int{0, 0, 0, 0, 0})
+	tm.WriteMultipleCoils(99, 5, []int{1, 1, 1, 0, 0})
 	tm.Close()
 }

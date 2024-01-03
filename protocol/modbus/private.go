@@ -43,7 +43,6 @@ func CheckEqualLen(x, y any) any {
 	} else {
 		return eq
 	}
-
 }
 
 var GetOperate = map[string]Operate{
