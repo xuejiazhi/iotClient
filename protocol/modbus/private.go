@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"iotClient/protocol/comm"
+	"strconv"
 )
 
 func getRegisterValue(dataBytes []byte) int {
@@ -25,6 +26,16 @@ func intToBytes(ns []int) []byte {
 		b = append(b, byte(n1), byte(n2))
 	}
 	return b
+}
+
+// 将二进制转成十进制
+func intoCoilsByte(ns []int) (int64, error) {
+	binaryStr := ""
+	for _, n := range ns {
+		binaryStr += strconv.Itoa(n)
+	}
+	//parse
+	return strconv.ParseInt(binaryStr, 2, 64)
 }
 
 // Operate function
