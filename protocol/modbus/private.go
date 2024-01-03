@@ -45,7 +45,7 @@ func GetModBusSlaveID(x, y any) any { return comm.If(x.(uint8) > 0, x, y).(uint8
 func GetModBusTcpAddr(x, y any) any { return comm.If(x != "", x, y).(string) }
 func GetModBusTcpPort(x, y any) any { return comm.If(x.(int) > 0, x, y).(int) }
 func CheckLessLen(x, y any) any {
-	return comm.If(len(x.([]byte)) > y.(int), nil, errors.New(fmt.Sprintf("less than %v", y)))
+	return comm.If(len(x.([]byte)) == y.(int), nil, errors.New(fmt.Sprintf("less than %v", y)).(error))
 }
 func CheckEqualLen(x, y any) any {
 	eq := comm.If(x.(int) == y.(int), nil, errors.New(fmt.Sprintf("length is not equal, %v", y)))
@@ -62,4 +62,67 @@ var GetOperate = map[string]Operate{
 	"tcpPort":      GetModBusTcpPort,
 	"checkLessLen": CheckLessLen,
 	"checkEqLen":   CheckEqualLen,
+}
+
+type OperateModbus func(rc RegClient) ([]int, error)
+
+var ModbusOperate = map[string]OperateModbus{
+	"readRegister": func(rc RegClient) (values []int, err error) {
+		//读取寄存器
+		results, err := GetResult(rc, "readRegister", 2)
+
+		//设置数据
+		for i := 0; i < len(results); i = i + 2 {
+			//一个数据为两个byte
+			dataBytes := results[i : i+2]
+			if len(dataBytes) == 2 {
+				values = append(values, getRegisterValue(dataBytes))
+			}
+		}
+		return
+	},
+	"readCoils": func(rc RegClient) (values []int, err error) {
+		// 读点位线圈数据
+		results, err := GetResult(rc, "readCoils", 1)
+		if err != nil {
+			return
+		}
+		//取data
+		values = comm.DecimalToBinary(int(results[0]))
+		return
+	},
+	"readInputs": func(rc RegClient) (values []int, err error) {
+		// 读点位线圈数据
+		results, err := t.Client.ReadDiscreteInputs(address, quantity)
+		//check error
+		if err != nil {
+			return
+		}
+		//check less len
+		if err = GetOperate["checkLessLen"](results, 1).(error); err != nil {
+			return
+		}
+	},
+}
+
+func GetResult(rc RegClient, opt string, lessThan int) (results []byte, err error) {
+	switch opt {
+	case "readCoils":
+		results, err = rc.Client.ReadCoils(rc.Address, rc.Quantity)
+	case "readRegister":
+		results, err = rc.Client.ReadHoldingRegisters(rc.Address, rc.Quantity)
+	case "readInputs":
+		results, err = rc.Client.ReadDiscreteInputs(rc.Address, rc.Quantity)
+	default:
+		err = errors.New("Opt is error")
+		return
+	}
+
+	//check less len
+	if len(results) < lessThan {
+		err = errors.New(fmt.Sprintf("length is not than %d", lessThan))
+		return
+	}
+	//return
+	return
 }

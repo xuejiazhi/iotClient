@@ -59,33 +59,26 @@ func (r *RtuClient) Close() (err error) {
 
 func (r *RtuClient) ReadHoldingRegisters(address uint16, quantity uint16) (values []int, err error) {
 	//读取寄存器
-	results, err := r.Client.ReadHoldingRegisters(address, quantity)
-	//check error
-	if err != nil {
-		return
-	}
-	//check less len
-	if c := GetOperate["checkLessLen"](results, 2); c != nil {
-		err = c.(error)
-		return
-	}
-
-	//设置数据
-	for i := 0; i < len(results); i = i + 2 {
-		//一个数据为两个byte
-		dataBytes := results[i : i+2]
-		if len(dataBytes) == 2 {
-			values = append(values, getRegisterValue(dataBytes))
-		}
-	}
+	values, err = ModbusOperate["readRegister"](RegClient{
+		Address:  address,
+		Quantity: quantity,
+		Client:   r.Client,
+	})
 
 	//return data
 	return
-	return nil, nil
 }
 
-func (r *RtuClient) ReadCoils(uint16, uint16) ([]int, error) {
-	return nil, nil
+func (r *RtuClient) ReadCoils(address uint16, quantity uint16) (values []int, err error) {
+	//读取寄存器
+	values, err = ModbusOperate["readCoils"](RegClient{
+		Address:  address,
+		Quantity: quantity,
+		Client:   r.Client,
+	})
+
+	//return data
+	return
 }
 
 func (r *RtuClient) ReadInputStatus(uint16, uint16) ([]int, error) {
