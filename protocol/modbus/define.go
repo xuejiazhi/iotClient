@@ -28,6 +28,7 @@ type ModbusClient interface {
 	WriteSingleRegister(uint16, uint16) error
 	WriteMultipleRegisters(address, quantity uint16, values []int) error
 	WriteSingleCoil(uint16, uint16) error
+	WriteMultipleCoils(uint16, uint16, []int) error
 }
 
 type TcpClient struct {

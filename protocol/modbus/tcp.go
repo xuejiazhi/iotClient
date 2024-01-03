@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/goburrow/modbus"
 	"iotClient/protocol/comm"
+	"log"
+	"strconv"
 )
 
 /*
@@ -193,6 +195,34 @@ func (t *TcpClient) WriteSingleCoil(address, value uint16) (err error) {
 	return
 }
 
-func (t *TcpClient) WriteMultipleCoils(address, quantity uint16, value []byte) {
+func (t *TcpClient) WriteMultipleCoils(address, quantity uint16, values []int) (err error) {
+	//check eq len
+	if c := GetOperate["checkEqLen"](len(values), int(quantity)); c != nil {
+		err = c.(error)
+		return
+	}
 
+	//转化值
+	decimal, err := func(x []int) (decimal int64, err error) {
+		binaryStr := ""
+		for _, v := range x {
+			binaryStr = strconv.Itoa(v) + binaryStr
+		}
+		return strconv.ParseInt(binaryStr, 2, 64)
+	}(values)
+
+	//err return
+	if err != nil {
+		log.Fatal("write multiple coils error,convert decimal error,", err.Error())
+		return
+	}
+
+	//write value
+	_, err = t.Client.WriteMultipleCoils(address, quantity, []byte{uint8(decimal)})
+	if err != nil {
+		log.Fatal("write multiple coils error,", err.Error())
+		return
+	}
+
+	return
 }

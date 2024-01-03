@@ -86,3 +86,9 @@ func Test_WriteCoils(t *testing.T) {
 	tm.WriteSingleCoil(99, 1)
 	tm.Close()
 }
+
+func Test_WriteMultiCoils(t *testing.T) {
+	tm := initModbusClient()
+	tm.WriteMultipleCoils(99, 5, []int{0, 0, 0, 0, 0})
+	tm.Close()
+}
