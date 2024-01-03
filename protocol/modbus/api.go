@@ -52,3 +52,9 @@ type RtuClient struct {
 	Client   modbus.Client
 	Handler  *modbus.RTUClientHandler
 }
+
+type RegClient struct {
+	Address  uint16
+	Quantity uint16
+	Client   modbus.Client
+}

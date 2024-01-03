@@ -28,3 +28,13 @@ func Test_ReadRtuHoldingRegisters(t *testing.T) {
 	values, _ := tm.ReadHoldingRegisters(uint16(99), uint16(3))
 	fmt.Println(values)
 }
+
+// 读线圈
+func Test_ReadRtuCoils(t *testing.T) {
+	tm := initModbusRtuClient()
+	defer tm.Close()
+
+	//读线圈
+	values, _ := tm.ReadCoils(99, 4)
+	fmt.Println(values)
+}
