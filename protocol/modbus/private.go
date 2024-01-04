@@ -67,9 +67,9 @@ var GetOperate = map[string]Operate{
 type OperateModbus func(rc RegClient) ([]int, error)
 
 var ModbusOperate = map[string]OperateModbus{
-	"readRegister": func(rc RegClient) (values []int, err error) {
+	"readHoldingRegisters": func(rc RegClient) (values []int, err error) {
 		//读取寄存器
-		results, err := GetResult(rc, "readRegister", 2)
+		results, err := GetResult(rc, "readHoldingRegisters", 2)
 
 		//设置数据
 		for i := 0; i < len(results); i = i + 2 {
@@ -81,6 +81,7 @@ var ModbusOperate = map[string]OperateModbus{
 		}
 		return
 	},
+
 	"readCoils": func(rc RegClient) (values []int, err error) {
 		// 读点位线圈数据
 		results, err := GetResult(rc, "readCoils", 1)
@@ -91,17 +92,35 @@ var ModbusOperate = map[string]OperateModbus{
 		values = comm.DecimalToBinary(int(results[0]))
 		return
 	},
-	"readInputs": func(rc RegClient) (values []int, err error) {
+
+	"readInputStatus": func(rc RegClient) (values []int, err error) {
 		// 读点位线圈数据
-		results, err := t.Client.ReadDiscreteInputs(address, quantity)
+		results, err := GetResult(rc, "readInputStatus", 1)
 		//check error
 		if err != nil {
 			return
 		}
-		//check less len
-		if err = GetOperate["checkLessLen"](results, 1).(error); err != nil {
+
+		//取data
+		values = comm.DecimalToBinary(int(results[0]))
+		return
+	},
+
+	"readInputRegisters": func(rc RegClient) (values []int, err error) {
+		//读取寄存器
+		results, err := GetResult(rc, "readInputRegisters", 1)
+		if err != nil {
 			return
 		}
+		//设置数据
+		for i := 0; i < len(results); i = i + 2 {
+			//一个数据为两个byte
+			dataBytes := results[i : i+2]
+			if len(dataBytes) == 2 {
+				values = append(values, int(dataBytes[0])*256+int(dataBytes[1]))
+			}
+		}
+		return
 	},
 }
 
@@ -109,10 +128,12 @@ func GetResult(rc RegClient, opt string, lessThan int) (results []byte, err erro
 	switch opt {
 	case "readCoils":
 		results, err = rc.Client.ReadCoils(rc.Address, rc.Quantity)
-	case "readRegister":
+	case "readHoldingRegisters":
 		results, err = rc.Client.ReadHoldingRegisters(rc.Address, rc.Quantity)
-	case "readInputs":
+	case "readInputStatus":
 		results, err = rc.Client.ReadDiscreteInputs(rc.Address, rc.Quantity)
+	case "readInputRegisters":
+		results, err = rc.Client.ReadInputRegisters(rc.Address, rc.Quantity)
 	default:
 		err = errors.New("Opt is error")
 		return
