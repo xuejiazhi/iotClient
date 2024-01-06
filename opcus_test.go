@@ -23,6 +23,7 @@ func Test_connectOpcUa(t *testing.T) {
 	opcSer.Close()
 }
 
+// 读取单个点位数据
 func Test_ReadOpcUa(t *testing.T) {
 	opc := initOpcUa()
 	value, err := opc.ReadValue("ns=3;i=1008")
@@ -32,4 +33,22 @@ func Test_ReadOpcUa(t *testing.T) {
 	for key, value := range value {
 		fmt.Printf("Key: %s, Value: %v\n", key, value)
 	}
+}
+
+func Test_GetEndPoints(t *testing.T) {
+	opc := initOpcUa()
+	err := opc.GetPoints()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+// 批量读取点位数据
+func Test_ReadOpeUaValues(t *testing.T) {
+	opc := initOpcUa()
+	value, err := opc.ReadBatchValues([]string{"ns=3;i=1003", "ns=3;i=1004", "ns=3;i=1008"})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	fmt.Println(value)
 }

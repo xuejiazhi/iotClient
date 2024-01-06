@@ -2,6 +2,7 @@ package opcua
 
 import (
 	"context"
+	"fmt"
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/ua"
 	"github.com/pkg/errors"
@@ -38,6 +39,13 @@ func (t *TcpClient) InitOpcUa() (err error) {
 
 func (t *TcpClient) Close() (err error) {
 	err = t.Client.Close(context.TODO())
+	return
+}
+
+func (t *TcpClient) GetPoints() (err error) {
+	var resp *ua.GetEndpointsResponse
+	resp, err = t.Client.GetEndpoints(context.TODO())
+	fmt.Println(resp)
 	return
 }
 
@@ -84,6 +92,33 @@ func (t *TcpClient) ReadValue(nodeId string) (data map[string]interface{}, err e
 	RetValue["SourcePicoseconds"] = resp.Results[0].SourcePicoseconds
 	RetValue["ServerTimestamp"] = resp.Results[0].ServerTimestamp
 	RetValue["ServerPicoseconds"] = resp.Results[0].ServerPicoseconds
+
+	//set value
 	data = RetValue
+	return
+}
+
+// ReadBatchValues 读取批量点位数据
+func (t *TcpClient) ReadBatchValues(nodeIds []string) (data []map[string]interface{}, err error) {
+	if len(nodeIds) == 0 {
+		err = errors.New("nodeId list is null")
+		return
+	}
+
+	//要返回的数据
+	retDatas := []map[string]interface{}{}
+	for _, id := range nodeIds {
+		var retData map[string]interface{}
+		retData, err = t.ReadValue(id)
+		if err != nil {
+			return
+		}
+		retDatas = append(retDatas, retData)
+	}
+
+	//set value
+	data = retDatas
+
+	//return
 	return
 }
