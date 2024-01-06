@@ -227,7 +227,3 @@ func (t *TcpClient) WriteMultipleCoils(address, quantity uint16, values []int) (
 
 	return
 }
-
-func (t *TcpClient) WriteInputStatus(address, value uint16) {
-
-}

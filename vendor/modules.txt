@@ -4,3 +4,21 @@ github.com/goburrow/modbus
 # github.com/goburrow/serial v0.1.0
 ## explicit
 github.com/goburrow/serial
+# github.com/gopcua/opcua v0.5.3
+## explicit; go 1.20
+github.com/gopcua/opcua
+github.com/gopcua/opcua/debug
+github.com/gopcua/opcua/errors
+github.com/gopcua/opcua/id
+github.com/gopcua/opcua/stats
+github.com/gopcua/opcua/ua
+github.com/gopcua/opcua/uacp
+github.com/gopcua/opcua/uapolicy
+github.com/gopcua/opcua/uasc
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
+# golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
+## explicit; go 1.20
+golang.org/x/exp/constraints
+golang.org/x/exp/slices
