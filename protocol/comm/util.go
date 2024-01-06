@@ -1,7 +1,10 @@
 package comm
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"runtime"
 )
 
@@ -57,4 +60,38 @@ func GetOs() {
 	default:
 		fmt.Printf("未知操作系统 %s\n", os)
 	}
+}
+
+func StructToMap(content interface{}) map[string]interface{} {
+	var name map[string]interface{}
+	if marshalContent, err := json.Marshal(content); err != nil {
+		fmt.Println(err)
+	} else {
+		d := json.NewDecoder(bytes.NewReader(marshalContent))
+		d.UseNumber() // 设置将float64转为一个number
+		if err := d.Decode(&name); err != nil {
+			fmt.Println(err)
+		} else {
+			for k, v := range name {
+				name[k] = v
+			}
+		}
+	}
+	return name
+}
+
+func Struct2map(obj any) (data map[string]any) {
+	// 通过反射将结构体转换成map
+	data = make(map[string]any)
+	objT := reflect.TypeOf(obj)
+	objV := reflect.ValueOf(obj)
+	for i := 0; i < objT.NumField(); i++ {
+		fileName, ok := objT.Field(i).Tag.Lookup("json")
+		if ok {
+			data[fileName] = objV.Field(i).Interface()
+		} else {
+			data[objT.Field(i).Name] = objV.Field(i).Interface()
+		}
+	}
+	return data
 }
