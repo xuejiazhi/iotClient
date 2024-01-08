@@ -156,7 +156,7 @@ func (t *TcpClient) BrowseNode(nodeId string) (nodeDatas []map[string]interface{
 	return
 }
 
-// 写入数据
+// Write 写入数据
 func (t *TcpClient) Write(nodeId, value string) (err error) {
 	//parse node id
 	pid, err := ua.ParseNodeID(nodeId)
