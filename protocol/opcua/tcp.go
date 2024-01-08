@@ -6,6 +6,7 @@ import (
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/ua"
 	"github.com/pkg/errors"
+	"github.com/spf13/cast"
 	"iotClient/protocol/comm"
 	"log"
 )
@@ -124,9 +125,14 @@ func (t *TcpClient) ReadBatchValues(nodeIds []string) (data []map[string]interfa
 	return
 }
 
+// BrowseNode Node列表
 func (t *TcpClient) BrowseNode(nodeId string) (nodeDatas []map[string]interface{}, err error) {
 	//parse node id
 	pid, err := ua.ParseNodeID(nodeId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	//get nodeList
 	nodeList, err := browse(context.TODO(), t.Client.Node(pid), "", 0)
@@ -145,6 +151,58 @@ func (t *TcpClient) BrowseNode(nodeId string) (nodeDatas []map[string]interface{
 
 	//set values
 	nodeDatas = nodeValues
+
+	//return
+	return
+}
+
+// 写入数据
+func (t *TcpClient) Write(nodeId, value string) (err error) {
+	//parse node id
+	pid, err := ua.ParseNodeID(nodeId)
+	if err != nil {
+		log.Fatalf("parse node id error:%v", err.Error())
+		return
+	}
+
+	//value
+	v, err := ua.NewVariant(value)
+	if err != nil {
+		log.Fatalf("invalid value: %v", err)
+		return
+	}
+
+	//request
+	req := &ua.WriteRequest{
+		NodesToWrite: []*ua.WriteValue{
+			{
+				NodeID:      pid,
+				AttributeID: ua.AttributeIDValue,
+				Value: &ua.DataValue{
+					EncodingMask: ua.DataValueValue,
+					Value:        v,
+				},
+			},
+		},
+	}
+
+	//write value
+	resp, err := t.Client.Write(context.TODO(), req)
+	if err != nil {
+		log.Fatalf("Write failed: %s", err)
+		return
+	}
+
+	//判断CODE
+	if len(resp.Results) > 0 {
+		errCode := cast.ToInt(resp.Results[0])
+		if errCode == 0 {
+			return
+		}
+	}
+
+	//write failed set value
+	err = errors.New(fmt.Sprintf("write failed NodeId %s", nodeId))
 
 	//return
 	return
