@@ -33,6 +33,7 @@ func Test_ReadOpcUa(t *testing.T) {
 	for key, value := range value {
 		fmt.Printf("Key: %s, Value: %v\n", key, value)
 	}
+	opc.Close()
 }
 
 func Test_GetEndPoints(t *testing.T) {
@@ -41,6 +42,7 @@ func Test_GetEndPoints(t *testing.T) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	opc.Close()
 }
 
 // 批量读取点位数据
@@ -51,4 +53,12 @@ func Test_ReadOpeUaValues(t *testing.T) {
 		log.Fatal(err.Error())
 	}
 	fmt.Println(value)
+	opc.Close()
+}
+
+func Test_BrowseNode(t *testing.T) {
+	opc := initOpcUa()
+	nodeList, err := opc.BrowseNode("ns=3;s=85/0:Simulation")
+	log.Print(nodeList)
+	log.Print(err)
 }

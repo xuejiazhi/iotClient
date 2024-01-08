@@ -6,6 +6,7 @@ import (
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/ua"
 	"github.com/pkg/errors"
+	"iotClient/protocol/comm"
 	"log"
 )
 
@@ -118,6 +119,32 @@ func (t *TcpClient) ReadBatchValues(nodeIds []string) (data []map[string]interfa
 
 	//set value
 	data = retDatas
+
+	//return
+	return
+}
+
+func (t *TcpClient) BrowseNode(nodeId string) (nodeDatas []map[string]interface{}, err error) {
+	//parse node id
+	pid, err := ua.ParseNodeID(nodeId)
+
+	//get nodeList
+	nodeList, err := browse(context.TODO(), t.Client.Node(pid), "", 0)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	//set node
+	nodeValues := []map[string]interface{}{}
+	//range
+	for _, def := range nodeList {
+		data := comm.StructToMap(def)
+		nodeValues = append(nodeValues, data)
+	}
+
+	//set values
+	nodeDatas = nodeValues
 
 	//return
 	return
