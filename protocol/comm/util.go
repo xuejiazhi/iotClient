@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"runtime"
 )
 
@@ -78,20 +77,4 @@ func StructToMap(content interface{}) map[string]interface{} {
 		}
 	}
 	return name
-}
-
-func Struct2map(obj any) (data map[string]any) {
-	// 通过反射将结构体转换成map
-	data = make(map[string]any)
-	objT := reflect.TypeOf(obj)
-	objV := reflect.ValueOf(obj)
-	for i := 0; i < objT.NumField(); i++ {
-		fileName, ok := objT.Field(i).Tag.Lookup("json")
-		if ok {
-			data[fileName] = objV.Field(i).Interface()
-		} else {
-			data[objT.Field(i).Name] = objV.Field(i).Interface()
-		}
-	}
-	return data
 }

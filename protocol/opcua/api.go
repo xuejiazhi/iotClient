@@ -10,6 +10,7 @@ type OpcUaClient interface {
 	ReadValue(nodeId string) (map[string]interface{}, error)
 	GetPoints() error
 	ReadBatchValues(nodeIds []string) ([]map[string]interface{}, error)
+	BrowseNode(nodeId string) ([]map[string]interface{}, error)
 }
 
 type TcpClient struct {
