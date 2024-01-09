@@ -15,6 +15,11 @@ type OpcUaClient interface {
 }
 
 type TcpClient struct {
+<<<<<<< HEAD
 	EndPoint string        `json:"end_point"` //TCP 地址  opc.tcp://1:53530/OPCUA/SimulationServer
 	Client   *opcua.Client `json:"client"`
+=======
+	EndPoint string `json:"end_point"` //TCP 地址  opc.tcp://1:53530/OPCUA/SimulationServer
+	Client   *opcua.Client
+>>>>>>> f439971d67e78c29059d07085b0622a221998c2b
 }

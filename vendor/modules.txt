@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 # github.com/eclipse/paho.mqtt.golang v1.4.3
 ## explicit; go 1.18
 github.com/eclipse/paho.mqtt.golang
 github.com/eclipse/paho.mqtt.golang/packets
+=======
+>>>>>>> f439971d67e78c29059d07085b0622a221998c2b
 # github.com/goburrow/modbus v0.1.0
 ## explicit
 github.com/goburrow/modbus
@@ -19,9 +22,12 @@ github.com/gopcua/opcua/ua
 github.com/gopcua/opcua/uacp
 github.com/gopcua/opcua/uapolicy
 github.com/gopcua/opcua/uasc
+<<<<<<< HEAD
 # github.com/gorilla/websocket v1.5.1
 ## explicit; go 1.20
 github.com/gorilla/websocket
+=======
+>>>>>>> f439971d67e78c29059d07085b0622a221998c2b
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -32,6 +38,7 @@ github.com/spf13/cast
 ## explicit; go 1.20
 golang.org/x/exp/constraints
 golang.org/x/exp/slices
+<<<<<<< HEAD
 # golang.org/x/net v0.20.0
 ## explicit; go 1.18
 golang.org/x/net/internal/socks
@@ -39,3 +46,5 @@ golang.org/x/net/proxy
 # golang.org/x/sync v0.6.0
 ## explicit; go 1.18
 golang.org/x/sync/semaphore
+=======
+>>>>>>> f439971d67e78c29059d07085b0622a221998c2b
