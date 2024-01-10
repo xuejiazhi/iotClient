@@ -6,6 +6,7 @@ type MqttClient interface {
 	InitMqtt() error
 	DisConnect()
 	Publish(string, string) error
+	Subscribe(string, SubscribeHandler)
 }
 
 type TcpClient struct {
@@ -18,3 +19,5 @@ type TcpClient struct {
 	ConnectHandler     mqtt.OnConnectHandler      `json:"connectHandler"`
 	ConnectLostHandler mqtt.ConnectionLostHandler `json:"connectLostHandler"`
 }
+
+type SubscribeHandler mqtt.MessageHandler

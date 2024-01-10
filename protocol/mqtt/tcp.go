@@ -1,25 +1,9 @@
 package mqtt
 
 import (
-	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"log"
 )
-
-// var MessagePubHandler pubHandler
-// var ConnectHandler connectHandler
-//var ConnectLostHandler lostHandler
-
-var MessagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
-}
-
-var ConnectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	fmt.Println("hello1")
-}
-
-var ConnectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	fmt.Println("hello2")
-}
 
 // InitMqtt init mqtt
 func (m *TcpClient) InitMqtt() (err error) {
@@ -34,11 +18,11 @@ func (m *TcpClient) InitMqtt() (err error) {
 		opts.SetUsername(m.UserName)
 		opts.SetPassword(m.Password)
 	}
-	opts.SetDefaultPublishHandler(MessagePubHandler)
+	opts.SetDefaultPublishHandler(m.MessagePubHandler)
 	opts.SetAutoReconnect(true)
 	opts.SetMaxReconnectInterval(3)
-	opts.OnConnect = ConnectHandler
-	opts.OnConnectionLost = ConnectLostHandler
+	opts.OnConnect = m.ConnectHandler
+	opts.OnConnectionLost = m.ConnectLostHandler
 
 	//set client
 	m.Client = mqtt.NewClient(opts)
@@ -56,6 +40,13 @@ func (m *TcpClient) Publish(topic, payLoad string) (err error) {
 		err = token.Error()
 	}
 	return
+}
+
+// Subscribe 订阅消息
+func (m *TcpClient) Subscribe(topic string, subFunc SubscribeHandler) {
+	if token := m.Client.Subscribe(topic, 0, mqtt.MessageHandler(subFunc)); token.Wait() && token.Error() != nil {
+		log.Fatal(token.Error())
+	}
 }
 
 // DisConnect 断开链接
