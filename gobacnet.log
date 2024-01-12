@@ -1,0 +1,4 @@
+time="2024-01-12T18:25:31+08:00" level=debug msg="Broadcast Address: 192.168.31.255"
+time="2024-01-12T18:25:31+08:00" level=debug msg="Local Address: 192.168.31.171/24"
+time="2024-01-12T18:25:31+08:00" level=debug msg="Port: bac0"
+time="2024-01-12T18:25:31+08:00" level=debug msg="Received IAm Message"

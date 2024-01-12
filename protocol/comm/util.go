@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"runtime"
+	"strconv"
 )
 
 func If(condition bool, x, y any) any {
@@ -77,4 +78,9 @@ func StructToMap(content interface{}) map[string]interface{} {
 		}
 	}
 	return name
+}
+
+func HexToInt(hexadecimal_num string) int64 {
+	decimal_num, _ := strconv.ParseInt(hexadecimal_num, 16, 64)
+	return decimal_num
 }
